@@ -1,0 +1,10 @@
+{
+    "name":"Ubuntu Docker Dev Container",
+    "dockerFile":"Dockerfile",
+    "extensions":["ms-vscode-remote.remote-containers"],
+    "settings":{
+        "terminal.integrated.shell.linux":"/bin/bash"
+    },
+    "mounts": ["source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"]
+
+}
