@@ -6,19 +6,22 @@ from rosidl_runtime_py.utilities import get_message
 import rosbag2_py
 from geometry_msgs.msg import Twist
 
-# Reading messages from the MCAP file
 def read_messages(input_bag: str):
+    """ This function reads messages from the MCAP file 
+    
+    Args: 
+        param (str) : String with the name of the bag
+    """
     first = "-1"
 
     reader = rosbag2_py.SequentialReader()
-    # Open the bag
+    """ Here we open the bag """
     reader.open(
         rosbag2_py.StorageOptions(uri=input_bag, storage_id="mcap"),
         rosbag2_py.ConverterOptions(
             input_serialization_format="cdr", output_serialization_format="cdr"
         ),
     )
-    # Read topics from bag
     topic_types = reader.get_all_topics_and_types()
 
     def typename(topic_name):
@@ -46,15 +49,16 @@ def main(args=None):
     parser.add_argument(
         "input", help="input bag path (folder or filepath) to read from"
     )
-    # Add arguments lists for topic,frame,column
+    """ Add arguments lists for topic,frame,column """
     parser.add_argument('-t', '--topic', action='append', help='delimited list input', type=str)
     parser.add_argument('-f', '--frame', action='append', help='delimited list input', type=str)
     parser.add_argument('-c', '--column', action='append', help='delimited list input', type=str)
 
-    # Cmnd ex: python3 src/my_controller/my_controller/rosbag_to_pd.py my_bag -t /topic,/topic -f 32,12 -c AX,LZ
+    """ Cmnd ex: python3 src/my_controller/my_controller/rosbag_to_pd.py my_bag -t /topic,/topic -f 32,12 -c AX,LZ """
     args = parser.parse_args()
 
-    # Iterate through the elements from MCAP, convert to pandas dataframe and display it 
+    """ Iterate through the elements from MCAP, convert to pandas dataframe and display it """ 
+    print("Displaying the dataframe:")
     for topic, msg, frame in read_messages(args.input):
         if isinstance(msg, Twist):
             new_row =  {"FRAME": frame, "TOPIC": topic, "LX": msg.linear.x, "LY": msg.linear.y, "LZ": msg.linear.z, "AX": msg.angular.x, "AY": msg.angular.y, "AZ": msg.angular.z}
@@ -69,7 +73,7 @@ def main(args=None):
     list_frm = []
     list_clm = []
     
-    # Covert the arguments from command line to list
+    """ Covert the arguments from command line to list """
     for top in args.topic:
         for i in top.split(','):
             list_top.append(i)
@@ -82,7 +86,7 @@ def main(args=None):
         for i in clm.split(','):
             list_clm.append(i)
     
-    # Display the value for each topic, frame and column given zip(list_top,list_frm,list_clm)
+    """ Display the value for each topic, frame and column given """
     try:
         for (top,frm,clm) in zip(list_top,list_frm,list_clm):
             print(f"\n Search result: {float(df.loc[(df['FRAME'] == int(frm)) & (df['TOPIC'] == str(top)), clm].values)},", f" Topic: {top}, Frame: {frm}, Column: {clm}\n")
