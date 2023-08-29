@@ -8,8 +8,10 @@ import random
 class MyPublisher(Node):
 
     def __init__(self, topic:str):
+        # Initialise the name of node 
         super().__init__("my_publisher")
         self.topic = topic
+
         # Create publisher(data_type, topic name, size of queue )
         self.my_publisher_ = self.create_publisher(Twist, self.topic, 10)
         self.timer = self.create_timer(1.0, self.timer_callback)

@@ -5,6 +5,7 @@ from rclpy.node import Node
 class MyNode(Node):
 
     def __init__(self):
+        # Initialise the name of node 
         super().__init__("first_node")
         self.counter_ = 0
         self.create_timer(1.0,self.timer_callback)
@@ -14,13 +15,13 @@ class MyNode(Node):
         self.counter_+= 1 
 
 def main(args=None):
-    #initialise ros to communication
+    # Initialise ros to communication
     rclpy.init(args=args)
-    #create a node
+    # Create a node
     node = MyNode()
-    #spin = the node is continue ro run
+    # Spin = the node is continue to run
     rclpy.spin(node)
-    #initialise ros to shutdown
+    # Initialise ros to shutdown
     rclpy.shutdown()
 
 if __name__ == '__main__':

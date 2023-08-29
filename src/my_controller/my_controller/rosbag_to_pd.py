@@ -11,12 +11,14 @@ def read_messages(input_bag: str):
     first = "-1"
 
     reader = rosbag2_py.SequentialReader()
+    # Open the bag
     reader.open(
         rosbag2_py.StorageOptions(uri=input_bag, storage_id="mcap"),
         rosbag2_py.ConverterOptions(
             input_serialization_format="cdr", output_serialization_format="cdr"
         ),
     )
+    # Read topics from bag
     topic_types = reader.get_all_topics_and_types()
 
     def typename(topic_name):
@@ -44,14 +46,15 @@ def main(args=None):
     parser.add_argument(
         "input", help="input bag path (folder or filepath) to read from"
     )
-    # Declare lists arguments for topic,frame,column
+    # Add arguments lists for topic,frame,column
     parser.add_argument('-t', '--topic', action='append', help='delimited list input', type=str)
     parser.add_argument('-f', '--frame', action='append', help='delimited list input', type=str)
     parser.add_argument('-c', '--column', action='append', help='delimited list input', type=str)
 
+    # Cmnd ex: python3 src/my_controller/my_controller/rosbag_to_pd.py my_bag -t /topic,/topic -f 32,12 -c AX,LZ
     args = parser.parse_args()
 
-    # Iterate through the elements from MCAP file and convert to pandas dataframe
+    # Iterate through the elements from MCAP, convert to pandas dataframe and display it 
     for topic, msg, frame in read_messages(args.input):
         if isinstance(msg, Twist):
             new_row =  {"FRAME": frame, "TOPIC": topic, "LX": msg.linear.x, "LY": msg.linear.y, "LZ": msg.linear.z, "AX": msg.angular.x, "AY": msg.angular.y, "AZ": msg.angular.z}
@@ -72,22 +75,21 @@ def main(args=None):
             list_top.append(i)
 
     for frm in args.frame:
-            for i in frm.split(','):
-                list_frm.append(i)
+        for i in frm.split(','):
+            list_frm.append(i)
     
     for clm in args.column:
-            for i in clm.split(','):
-                list_clm.append(i)
+        for i in clm.split(','):
+            list_clm.append(i)
     
-    # Display the value for each topic, frame and column given
+    # Display the value for each topic, frame and column given zip(list_top,list_frm,list_clm)
     try:
         for (top,frm,clm) in zip(list_top,list_frm,list_clm):
             print(f"\n Search result: {float(df.loc[(df['FRAME'] == int(frm)) & (df['TOPIC'] == str(top)), clm].values)},", f" Topic: {top}, Frame: {frm}, Column: {clm}\n")
             print ( "------------------------------------------------------------------")
 
     except:
-          print(f"[ERROR] Invalid column!: ({type(val).__name__}) - ({args.topic}), ({args.frame}), ({args.column}) ")
-
+          print(f"[ERROR] Invalid column!: ({type(clm).__name__}) - ({args.topic}), ({args.frame}), ({args.column}) ")
 
 if __name__ == '__main__':
     main()
