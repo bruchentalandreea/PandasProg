@@ -8,6 +8,9 @@ build
 install
 log
 
+#pycache
+__pycache__/
+
 devel/
 log/
 build/
